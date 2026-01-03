@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Score Applicant - Agrarian BNPL{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📊 Score Applicant</h2>
+    <p style="margin-bottom: 2rem; color: #555;">
+        Enter farmer profile details to receive instant risk assessment, product recommendation, and BNPL terms.
+        All fields are required.
+    </p>
+
+    <form action="/score" method="post" id="scoreForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="user_id">User ID</label>
+                <input type="text" id="user_id" name="user_id" placeholder="e.g., SYNTHETIC_0001" required>
+                <small>Unique applicant identifier</small>
+            </div>
+
+            <div class="form-group">
+                <label for="region">Region</label>
+                <select id="region" name="region" required>
+                    <option value="">Select region...</option>
+                    <option value="North">North</option>
+                    <option value="South">South</option>
+                    <option value="East">East</option>
+                    <option value="West">West</option>
+                    <option value="Central">Central</option>
+                </select>
+                <small>Geographic location</small>
+            </div>
+
+            <div class="form-group">
+                <label for="farm_type">Farm Type</label>
+                <select id="farm_type" name="farm_type" required>
+                    <option value="">Select farm type...</option>
+                    <option value="smallholder">Smallholder</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="cooperative">Cooperative</option>
+                </select>
+                <small>Type of farming operation</small>
+            </div>
+
+            <div class="form-group">
+                <label for="crop_type">Crop Type</label>
+                <select id="crop_type" name="crop_type" required>
+                    <option value="">Select crop type...</option>
+                    <option value="maize">Maize</option>
+                    <option value="rice">Rice</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="livestock">Livestock</option>
+                    <option value="mixed">Mixed</option>
+                    <option value="horticulture">Horticulture</option>
+                </select>
+                <small>Primary crop or activity</small>
+            </div>
+
+            <div class="form-group">
+                <label for="farm_size_ha">Farm Size (hectares)</label>
+                <input type="number" id="farm_size_ha" name="farm_size_ha" step="0.1" min="0.5" max="500" placeholder="e.g., 3.5" required>
+                <small>Range: 0.5 - 500 ha</small>
+            </div>
+
+            <div class="form-group">
+                <label for="years_experience">Years of Experience</label>
+                <input type="number" id="years_experience" name="years_experience" min="0" max="40" placeholder="e.g., 8" required>
+                <small>Farming experience (0-40 years)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="monthly_income_est">Monthly Income (Estimate)</label>
+                <input type="number" id="monthly_income_est" name="monthly_income_est" step="1000" min="5000" max="500000" placeholder="e.g., 45000" required>
+                <small>Range: 5,000 - 500,000</small>
+            </div>
+
+            <div class="form-group">
+                <label for="recent_cash_inflows">Recent Cash Inflows (90 days)</label>
+                <input type="number" id="recent_cash_inflows" name="recent_cash_inflows" step="1000" min="0" max="1000000" placeholder="e.g., 120000" required>
+                <small>Range: 0 - 1,000,000</small>
+            </div>
+
+            <div class="form-group">
+                <label for="avg_order_value">Average Order Value</label>
+                <input type="number" id="avg_order_value" name="avg_order_value" step="1000" min="1000" max="200000" placeholder="e.g., 18000" required>
+                <small>Range: 1,000 - 200,000</small>
+            </div>
+
+            <div class="form-group">
+                <label for="device_trust_score">Device Trust Score</label>
+                <input type="number" id="device_trust_score" name="device_trust_score" step="0.1" min="0" max="100" placeholder="e.g., 78" required>
+                <small>Digital identity trust (0-100)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="identity_consistency">Identity Consistency Score</label>
+                <input type="number" id="identity_consistency" name="identity_consistency" step="0.1" min="0" max="100" placeholder="e.g., 85" required>
+                <small>KYC verification score (0-100)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="prior_defaults">Prior Payment Defaults</label>
+                <input type="number" id="prior_defaults" name="prior_defaults" min="0" max="5" value="0" required>
+                <small>Number of prior defaults (0-5)</small>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <button type="submit" class="btn btn-primary btn-block" style="max-width: 400px;">
+                🚀 Calculate Risk Score & Recommendation
+            </button>
+        </div>
+    </form>
+
+    <div class="alert alert-info" style="margin-top: 2rem;">
+        <strong>💡 Quick Fill:</strong> Click the button below to auto-fill the form with a sample profile.
+        <button onclick="fillSampleData()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Fill Sample Data
+        </button>
+    </div>
+</div>
+
+<script>
+function fillSampleData() {
+    document.getElementById('user_id').value = 'SYNTHETIC_TEST_001';
+    document.getElementById('region').value = 'North';
+    document.getElementById('farm_type').value = 'smallholder';
+    document.getElementById('crop_type').value = 'maize';
+    document.getElementById('farm_size_ha').value = '3.5';
+    document.getElementById('years_experience').value = '8';
+    document.getElementById('monthly_income_est').value = '45000';
+    document.getElementById('recent_cash_inflows').value = '120000';
+    document.getElementById('avg_order_value').value = '18000';
+    document.getElementById('device_trust_score').value = '78';
+    document.getElementById('identity_consistency').value = '85';
+    document.getElementById('prior_defaults').value = '0';
+}
+
+// Auto-fill form on page load for easy testing
+window.addEventListener('load', fillSampleData);
+</script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Agrarian BNPL{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome to the Agrarian BNPL Risk Scoring System</h2>
+    <p style="font-size: 1.1rem; line-height: 1.6; color: #555; margin-bottom: 2rem;">
+        A privacy-first, explainable credit risk assessment platform for agricultural financing.
+        Built with 100% synthetic data for demonstration purposes.
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h4>Product Match Accuracy</h4>
+            <div class="stat-value">100%</div>
+            <p style="color: #7f8c8d; margin-top: 0.5rem;">Target: ≥85%</p>
+        </div>
+        <div class="stat-card">
+            <h4>API Latency (p95)</h4>
+            <div class="stat-value">&lt;60ms</div>
+            <p style="color: #7f8c8d; margin-top: 0.5rem;">Target: &lt;200ms</p>
+        </div>
+        <div class="stat-card">
+            <h4>Test Pass Rate</h4>
+            <div class="stat-value">18/18</div>
+            <p style="color: #7f8c8d; margin-top: 0.5rem;">100% Coverage</p>
+        </div>
+        <div class="stat-card">
+            <h4>Synthetic Data</h4>
+            <div class="stat-value">1000</div>
+            <p style="color: #7f8c8d; margin-top: 0.5rem;">Applicant Profiles</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>🚀 Quick Start</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div style="border-left: 4px solid #2ecc71; padding-left: 1rem;">
+            <h3 style="color: #2ecc71; margin-bottom: 0.5rem;">1. Score Applicant</h3>
+            <p style="color: #555; margin-bottom: 1rem;">
+                Enter farmer profile details to get instant risk assessment, product recommendations, and BNPL terms.
+            </p>
+            <a href="/score" class="btn btn-primary">Get Started →</a>
+        </div>
+
+        <div style="border-left: 4px solid #3498db; padding-left: 1rem;">
+            <h3 style="color: #3498db; margin-bottom: 0.5rem;">2. View Analytics</h3>
+            <p style="color: #555; margin-bottom: 1rem;">
+                Explore risk distribution, farm size correlations, and product recommendation trends.
+            </p>
+            <a href="/dashboard" class="btn btn-secondary">View Dashboard →</a>
+        </div>
+
+        <div style="border-left: 4px solid #9b59b6; padding-left: 1rem;">
+            <h3 style="color: #9b59b6; margin-bottom: 0.5rem;">3. API Integration</h3>
+            <p style="color: #555; margin-bottom: 1rem;">
+                Integrate via REST API with OpenAPI documentation for programmatic access.
+            </p>
+            <a href="/docs" target="_blank" class="btn" style="background: #9b59b6; color: white;">API Docs →</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📊 Scoring Methodology</h2>
+    <p style="margin-bottom: 1.5rem; color: #555;">
+        Our rule-based scoring engine evaluates 8 key risk factors to generate transparent, auditable decisions:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Risk Factor</th>
+                <th>Weight</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Prior Defaults</strong></td>
+                <td><span class="badge-high badge">20%</span></td>
+                <td>Payment history and default count</td>
+            </tr>
+            <tr>
+                <td><strong>Farm Type</strong></td>
+                <td><span class="badge-high badge">18%</span></td>
+                <td>Smallholder, commercial, or cooperative</td>
+            </tr>
+            <tr>
+                <td><strong>Experience</strong></td>
+                <td><span class="badge-medium badge">15%</span></td>
+                <td>Years of farming experience</td>
+            </tr>
+            <tr>
+                <td><strong>Region</strong></td>
+                <td><span class="badge-medium badge">12%</span></td>
+                <td>Geographic risk assessment</td>
+            </tr>
+            <tr>
+                <td><strong>Liquidity Ratio</strong></td>
+                <td><span class="badge-medium badge">10%</span></td>
+                <td>Cash inflows vs income</td>
+            </tr>
+            <tr>
+                <td><strong>Device Trust</strong></td>
+                <td><span class="badge-medium badge">10%</span></td>
+                <td>Digital identity verification</td>
+            </tr>
+            <tr>
+                <td><strong>Farm Size</strong></td>
+                <td><span class="badge-low badge">8%</span></td>
+                <td>Land size in hectares</td>
+            </tr>
+            <tr>
+                <td><strong>Identity Consistency</strong></td>
+                <td><span class="badge-low badge">7%</span></td>
+                <td>KYC verification score</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="alert alert-info" style="margin-top: 1.5rem;">
+        <strong>📌 Note:</strong> All data is 100% synthetic and generated for demonstration purposes only.
+        No real personally identifiable information (PII) is collected or processed.
+    </div>
+</div>
+
+<div class="card">
+    <h2>🎯 Available BNPL Products</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+        <div style="border: 2px solid #2ecc71; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #2ecc71; margin-bottom: 0.5rem;">🌱 Seeds BNPL</h4>
+            <p style="font-size: 0.9rem; color: #555;">For maize and rice farmers with order values &lt; 30k</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 20,000 | <strong>Tenor:</strong> 4 months</p>
+        </div>
+
+        <div style="border: 2px solid #27ae60; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #27ae60; margin-bottom: 0.5rem;">🌿 Fertilizer BNPL</h4>
+            <p style="font-size: 0.9rem; color: #555;">For vegetable and horticulture farmers</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 35,000 | <strong>Tenor:</strong> 3 months</p>
+        </div>
+
+        <div style="border: 2px solid #e67e22; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #e67e22; margin-bottom: 0.5rem;">🚜 Equipment Lease</h4>
+            <p style="font-size: 0.9rem; color: #555;">For commercial farms with high-value orders</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 150,000 | <strong>Tenor:</strong> 12 months</p>
+        </div>
+
+        <div style="border: 2px solid #9b59b6; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #9b59b6; margin-bottom: 0.5rem;">📦 Input Bundle</h4>
+            <p style="font-size: 0.9rem; color: #555;">For mixed-crop and cooperative farmers</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 50,000 | <strong>Tenor:</strong> 6 months</p>
+        </div>
+
+        <div style="border: 2px solid #f39c12; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #f39c12; margin-bottom: 0.5rem;">💵 Cash Advance</h4>
+            <p style="font-size: 0.9rem; color: #555;">For small orders with high device trust</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 10,000 | <strong>Tenor:</strong> 2 months</p>
+        </div>
+
+        <div style="border: 2px solid #34495e; border-radius: 8px; padding: 1rem;">
+            <h4 style="color: #34495e; margin-bottom: 0.5rem;">⭐ Premium BNPL</h4>
+            <p style="font-size: 0.9rem; color: #555;">General BNPL for established customers</p>
+            <p style="margin-top: 0.5rem;"><strong>Base Limit:</strong> 75,000 | <strong>Tenor:</strong> 6 months</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

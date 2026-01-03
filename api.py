@@ -1,17 +1,27 @@
 # api.py
 """FastAPI REST API for Agrarian BNPL risk scoring and product recommendations.
 
-Endpoints:
-- POST /score: Compute risk score and late payment probability
-- POST /recommend_product: Get product recommendation with BNPL terms
-- POST /batch_score: Batch scoring for multiple applicants
+Web Interface Endpoints:
+- GET /: Home page
+- GET /score: Score form
+- POST /score: Submit scoring form (HTML response)
+- GET /dashboard: Analytics dashboard
+
+JSON API Endpoints:
+- POST /api/score: Compute risk score and late payment probability
+- POST /api/recommend_product: Get product recommendation with BNPL terms
+- POST /api/batch_score: Batch scoring for multiple applicants
+- GET /api: API root information
 - GET /health: Health check
 
 Usage:
     uvicorn api:app --reload --port 8000
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict
 from datetime import datetime
@@ -28,6 +38,11 @@ app = FastAPI(
     description="Privacy-first API for BNPL risk assessment and product recommendations",
     version="1.0.0"
 )
+
+# Mount static files and templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/charts", StaticFiles(directory="charts"), name="charts")
+templates = Jinja2Templates(directory="templates")
 
 # Track startup time for health check
 START_TIME = time.time()
@@ -121,10 +136,112 @@ def applicant_to_dict(applicant: ApplicantProfile) -> dict:
     return data
 
 
-# ===== API Endpoints =====
+# ===== Web Interface Routes (Define First for Priority) =====
 
-@app.post("/score", response_model=ScoreResponse)
-async def score_applicant(applicant: ApplicantProfile):
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    """Home page with overview and quick links."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/score", response_class=HTMLResponse)
+async def score_form(request: Request):
+    """Display scoring form."""
+    return templates.TemplateResponse("score_form.html", {"request": request})
+
+
+@app.post("/score", response_class=HTMLResponse)
+async def score_applicant_web(
+    request: Request,
+    user_id: str = Form(...),
+    region: str = Form(...),
+    farm_type: str = Form(...),
+    crop_type: str = Form(...),
+    farm_size_ha: float = Form(...),
+    years_experience: int = Form(...),
+    monthly_income_est: float = Form(...),
+    recent_cash_inflows: float = Form(...),
+    avg_order_value: float = Form(...),
+    device_trust_score: float = Form(...),
+    identity_consistency: float = Form(...),
+    prior_defaults: int = Form(...)
+):
+    """Process scoring form and display results."""
+    try:
+        # Create applicant dict
+        applicant_dict = {
+            'user_id': user_id,
+            'region': region,
+            'farm_type': farm_type,
+            'crop_type': crop_type,
+            'farm_size_ha': farm_size_ha,
+            'years_experience': years_experience,
+            'monthly_income_est': monthly_income_est,
+            'recent_cash_inflows': recent_cash_inflows,
+            'avg_order_value': avg_order_value,
+            'device_trust_score': device_trust_score,
+            'identity_consistency': identity_consistency,
+            'prior_defaults': prior_defaults,
+            'liquidity_ratio': recent_cash_inflows / monthly_income_est
+        }
+
+        # Compute scores
+        linear_score = compute_linear_risk_score(applicant_dict)
+        late_prob = sigmoid_pd_mapping(linear_score)
+        risk_tier = get_risk_tier(late_prob)
+
+        # Get explanation
+        explanation = explain_score(applicant_dict, linear_score)
+
+        # Match product
+        top_1, top_3 = match_product(applicant_dict)
+        product_info = get_product_info(top_1)
+
+        # Compute BNPL terms
+        bnpl_limit = compute_bnpl_limit(applicant_dict, top_1, late_prob)
+        bnpl_tenor = compute_bnpl_tenor(applicant_dict, top_1, late_prob)
+
+        result = {
+            'user_id': user_id,
+            'linear_risk_score': linear_score,
+            'late_payment_prob': late_prob,
+            'risk_tier': risk_tier,
+            'recommended_product': top_1,
+            'top_3_products': top_3,
+            'bnpl_limit': bnpl_limit,
+            'bnpl_tenor_months': bnpl_tenor,
+            'match_reason': product_info['description'],
+            'explanation': {
+                'top_contributors': [
+                    {
+                        'feature': comp['feature'],
+                        'contribution': comp['contribution'],
+                        'weight': comp['weight']
+                    }
+                    for comp in explanation['top_3_contributors']
+                ]
+            }
+        }
+
+        return templates.TemplateResponse("score_result.html", {
+            "request": request,
+            "result": result
+        })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scoring error: {str(e)}")
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def analytics_dashboard(request: Request):
+    """Display analytics dashboard."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+# ===== JSON API Endpoints =====
+
+@app.post("/api/score", response_model=ScoreResponse)
+async def score_applicant_api(applicant: ApplicantProfile):
     """Compute risk score and late payment probability for an applicant.
 
     Returns linear risk score, late payment probability, risk tier, decision,
@@ -166,7 +283,7 @@ async def score_applicant(applicant: ApplicantProfile):
         raise HTTPException(status_code=500, detail=f"Scoring error: {str(e)}")
 
 
-@app.post("/recommend_product", response_model=ProductRecommendationResponse)
+@app.post("/api/recommend_product", response_model=ProductRecommendationResponse)
 async def recommend_product(applicant: ApplicantProfile):
     """Recommend BNPL product with credit limit and tenor.
 
@@ -209,7 +326,7 @@ async def recommend_product(applicant: ApplicantProfile):
         raise HTTPException(status_code=500, detail=f"Recommendation error: {str(e)}")
 
 
-@app.post("/batch_score", response_model=BatchScoreResponse)
+@app.post("/api/batch_score", response_model=BatchScoreResponse)
 async def batch_score(request: BatchScoreRequest):
     """Batch scoring for multiple applicants.
 
@@ -272,14 +389,17 @@ async def health_check():
     }
 
 
-@app.get("/")
-async def root():
-    """Root endpoint with API documentation link."""
+# ===== API Root =====
+
+@app.get("/api")
+async def api_root():
+    """API root endpoint with documentation link."""
     return {
         'message': 'Agrarian BNPL Risk Scoring API',
         'version': '1.0.0',
         'documentation': '/docs',
-        'health': '/health'
+        'health': '/health',
+        'web_interface': '/'
     }
 
 

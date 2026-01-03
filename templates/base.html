@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Agrarian BNPL Risk Scoring{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/favicon.svg') }}">
+    <link rel="alternate icon" href="{{ url_for('static', path='/favicon.svg') }}" type="image/svg+xml">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌾 Agrarian BNPL Risk Scoring System</h1>
+            <p>Privacy-First, Explainable Credit Scoring for Agricultural Finance</p>
+        </header>
+
+        <nav class="nav">
+            <a href="/">🏠 Home</a>
+            <a href="/score">📊 Score Applicant</a>
+            <a href="/dashboard">📈 Analytics Dashboard</a>
+            <a href="/docs">📚 API Docs</a>
+        </nav>
+
+        {% block content %}{% endblock %}
+
+        <footer>
+            <p>
+                <strong>Agrarian BNPL v1.0.0</strong> |
+                100% Synthetic Data |
+                Built with FastAPI & Jinja2 |
+                <a href="/docs" target="_blank">API Documentation</a>
+            </p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                🔒 Privacy-First | 🔍 Explainable AI | ⚡ Real-Time Decisioning
+            </p>
+        </footer>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,116 @@
+# docker-compose.yml
+# Docker Compose configuration for Agrarian BNPL system
+# Includes API, Redis (feature store), and PostgreSQL (optional for production)
+
+version: '3.8'
+
+services:
+  # Main API service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bnpl-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=info
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://bnpl_user:bnpl_password@postgres:5432/bnpl_db
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - bnpl-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Redis for feature caching (optional, for production)
+  redis:
+    image: redis:7-alpine
+    container_name: bnpl-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    networks:
+      - bnpl-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for transaction logging (optional, for production)
+  postgres:
+    image: postgres:14-alpine
+    container_name: bnpl-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=bnpl_db
+      - POSTGRES_USER=bnpl_user
+      - POSTGRES_PASSWORD=bnpl_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - bnpl-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bnpl_user -d bnpl_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Prometheus for monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bnpl-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - bnpl-network
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bnpl-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - bnpl-network
+    profiles:
+      - monitoring
+
+networks:
+  bnpl-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

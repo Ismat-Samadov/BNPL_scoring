@@ -54,22 +54,26 @@ def generate_dashboard_data(n_samples=1000):
     return df
 
 
-def create_dashboard_charts(df, output_dir='.'):
-    """Create 3 dashboard charts and save as PNG.
+def create_dashboard_charts(df, output_dir='charts'):
+    """Create 3 dashboard charts and save as separate PNG files.
 
     Args:
         df: DataFrame with scored applicants
-        output_dir: Directory to save PNG (default current directory)
+        output_dir: Directory to save PNG files (default 'charts')
 
     Returns:
-        str: Path to saved PNG file
+        list: Paths to saved PNG files
     """
+    import os
+
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
 
     plt.style.use('seaborn-v0_8-darkgrid')
-    fig = plt.figure(figsize=(18, 5))
+    output_paths = []
 
     # ===== Chart 1: Late Payment Probability Distribution =====
-    ax1 = plt.subplot(1, 3, 1)
+    fig1, ax1 = plt.subplots(figsize=(10, 7))
 
     # Histogram with risk tier color coding
     n, bins, patches = ax1.hist(df['late_payment_prob'], bins=40,
@@ -95,22 +99,36 @@ def create_dashboard_charts(df, output_dir='.'):
     ax1.axvline(0.50, color='darkred', linestyle='--', linewidth=2,
                 label='Decline (50%)')
 
-    ax1.set_xlabel('Late Payment Probability', fontsize=11, fontweight='bold')
-    ax1.set_ylabel('Count', fontsize=11, fontweight='bold')
+    ax1.set_xlabel('Late Payment Probability', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Count', fontsize=12, fontweight='bold')
     ax1.set_title('Late Payment Probability Distribution\n(n=1000 synthetic applicants)',
-                  fontsize=12, fontweight='bold')
-    ax1.legend(loc='upper right', fontsize=9)
+                  fontsize=14, fontweight='bold', pad=20)
+
+    # Position legend in upper left to avoid overlap
+    ax1.legend(loc='upper left', fontsize=10, framealpha=0.95,
+               edgecolor='black', fancybox=True)
     ax1.grid(True, alpha=0.3)
 
-    # Add summary stats
+    # Add summary stats box in upper right (with padding)
     mean_pd = df['late_payment_prob'].mean()
     median_pd = df['late_payment_prob'].median()
-    ax1.text(0.98, 0.95, f'Mean: {mean_pd:.1%}\nMedian: {median_pd:.1%}',
-             transform=ax1.transAxes, fontsize=9, verticalalignment='top',
-             horizontalalignment='right', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    stats_text = f'Mean: {mean_pd:.1%}\nMedian: {median_pd:.1%}\nStd: {df["late_payment_prob"].std():.1%}'
+    ax1.text(0.97, 0.97, stats_text,
+             transform=ax1.transAxes, fontsize=11, verticalalignment='top',
+             horizontalalignment='right',
+             bbox=dict(boxstyle='round,pad=0.8', facecolor='lightblue',
+                      edgecolor='black', alpha=0.85, linewidth=1.5))
+
+    # Save Chart 1
+    chart1_path = f'{output_dir}/01_late_payment_probability_distribution.png'
+    plt.tight_layout()
+    fig1.savefig(chart1_path, dpi=300, bbox_inches='tight')
+    output_paths.append(chart1_path)
+    plt.close(fig1)
+    print(f"✓ Chart 1 saved: {chart1_path}")
 
     # ===== Chart 2: Farm Size vs Late Payment Probability (Scatter) =====
-    ax2 = plt.subplot(1, 3, 2)
+    fig2, ax2 = plt.subplots(figsize=(10, 7))
 
     # Color by farm type
     farm_type_colors = {
@@ -140,8 +158,16 @@ def create_dashboard_charts(df, output_dir='.'):
     ax2.set_xlim(0.5, 500)
     ax2.set_ylim(-0.05, 1.05)
 
+    # Save Chart 2
+    chart2_path = f'{output_dir}/02_farm_size_vs_payment_risk.png'
+    plt.tight_layout()
+    fig2.savefig(chart2_path, dpi=300, bbox_inches='tight')
+    output_paths.append(chart2_path)
+    plt.close(fig2)
+    print(f"✓ Chart 2 saved: {chart2_path}")
+
     # ===== Chart 3: Recommended Product Counts (Bar) =====
-    ax3 = plt.subplot(1, 3, 3)
+    fig3, ax3 = plt.subplots(figsize=(10, 7))
 
     product_counts = df['recommended_product'].value_counts().sort_values(ascending=True)
 
@@ -172,17 +198,15 @@ def create_dashboard_charts(df, output_dir='.'):
                   fontsize=12, fontweight='bold')
     ax3.grid(True, axis='x', alpha=0.3)
 
-    # Adjust layout
+    # Save Chart 3
+    chart3_path = f'{output_dir}/03_product_distribution.png'
     plt.tight_layout()
+    fig3.savefig(chart3_path, dpi=300, bbox_inches='tight')
+    output_paths.append(chart3_path)
+    plt.close(fig3)
+    print(f"✓ Chart 3 saved: {chart3_path}")
 
-    # Save figure
-    output_path = f'{output_dir}/bnpl_dashboard.png'
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"✓ Dashboard saved to: {output_path}")
-
-    plt.close()
-
-    return output_path
+    return output_paths
 
 
 def print_dashboard_summary(df):
@@ -231,10 +255,13 @@ if __name__ == "__main__":
     print_dashboard_summary(df)
 
     # Create charts
-    print("Creating dashboard charts...")
-    output_path = create_dashboard_charts(df, output_dir='.')
+    print("\nCreating dashboard charts...")
+    output_paths = create_dashboard_charts(df, output_dir='charts')
 
     print(f"\n✓ Dashboard generation complete!")
-    print(f"  • Output: {output_path}")
+    print(f"  • Output directory: charts/")
+    print(f"  • Charts created: {len(output_paths)}")
+    for i, path in enumerate(output_paths, 1):
+        print(f"    {i}. {path}")
     print(f"  • Resolution: 300 DPI")
-    print(f"  • Charts: 3 (distribution, scatter, bar)")
+    print(f"  • Format: PNG (high quality)")

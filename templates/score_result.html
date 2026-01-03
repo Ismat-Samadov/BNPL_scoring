@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Score Results - Agrarian BNPL{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>✅ Risk Assessment Complete</h2>
+    <p style="color: #555; margin-bottom: 1rem;">
+        <strong>Applicant ID:</strong> {{ result.user_id }}
+    </p>
+
+    <div class="result-box">
+        <h3>🎯 Decision: {{ result.recommended_product }}</h3>
+
+        <div class="result-grid">
+            <div class="result-item">
+                <strong>Risk Tier</strong>
+                <span class="badge {% if result.risk_tier == 'Low' %}badge-low{% elif result.risk_tier == 'Medium' %}badge-medium{% elif result.risk_tier == 'High' %}badge-high{% else %}badge-decline{% endif %}">
+                    {{ result.risk_tier }}
+                </span>
+            </div>
+
+            <div class="result-item">
+                <strong>Late Payment Probability</strong>
+                <span>{{ (result.late_payment_prob * 100)|round(1) }}%</span>
+            </div>
+
+            <div class="result-item">
+                <strong>Linear Risk Score</strong>
+                <span>{{ (result.linear_risk_score * 100)|round(1) }}/100</span>
+            </div>
+        </div>
+
+        <div class="result-grid" style="margin-top: 1.5rem;">
+            <div class="result-item">
+                <strong>BNPL Credit Limit</strong>
+                <span>{{ "{:,}".format(result.bnpl_limit) }}</span>
+            </div>
+
+            <div class="result-item">
+                <strong>Repayment Tenor</strong>
+                <span>{{ result.bnpl_tenor_months }} months</span>
+            </div>
+
+            <div class="result-item">
+                <strong>Top 3 Products</strong>
+                <span style="font-size: 1rem;">{{ result.top_3_products|join(', ') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📊 Risk Score Breakdown</h2>
+    <p style="margin-bottom: 1.5rem; color: #555;">
+        Top factors contributing to the risk assessment:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Risk Factor</th>
+                <th>Weight</th>
+                <th>Contribution</th>
+                <th>Impact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contrib in result.explanation.top_contributors %}
+            <tr>
+                <td><strong>#{{ loop.index }}</strong></td>
+                <td>{{ contrib.feature.replace('_', ' ').title() }}</td>
+                <td>{{ (contrib.weight * 100)|round(0) }}%</td>
+                <td>{{ (contrib.contribution * 100)|round(1) }}</td>
+                <td>
+                    {% if contrib.contribution > 0.05 %}
+                        <span class="badge-high badge">High</span>
+                    {% elif contrib.contribution > 0.02 %}
+                        <span class="badge-medium badge">Medium</span>
+                    {% else %}
+                        <span class="badge-low badge">Low</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>📋 Product Match Rationale</h2>
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3498db;">
+        <p style="margin-bottom: 1rem;"><strong>Recommended:</strong> {{ result.recommended_product }}</p>
+        <p style="color: #555;">{{ result.match_reason }}</p>
+
+        <div style="margin-top: 1.5rem;">
+            <strong>Alternative Options:</strong>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                {% for product in result.top_3_products %}
+                <span style="background: white; padding: 0.5rem 1rem; border-radius: 20px; border: 2px solid #3498db; font-weight: 600;">
+                    {{ product }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>💰 BNPL Terms Summary</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        <div style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="margin-bottom: 0.5rem; opacity: 0.9;">Credit Limit</h4>
+            <div style="font-size: 2rem; font-weight: 700;">{{ "{:,}".format(result.bnpl_limit) }}</div>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Risk-adjusted based on PD {{ (result.late_payment_prob * 100)|round(1) }}%</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="margin-bottom: 0.5rem; opacity: 0.9;">Repayment Period</h4>
+            <div style="font-size: 2rem; font-weight: 700;">{{ result.bnpl_tenor_months }} months</div>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Aligned with crop cycle</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <h4 style="margin-bottom: 0.5rem; opacity: 0.9;">Monthly Payment</h4>
+            <div style="font-size: 2rem; font-weight: 700;">
+                {% if result.bnpl_tenor_months > 0 %}
+                    {{ "{:,}".format((result.bnpl_limit / result.bnpl_tenor_months)|round(0)|int) }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Estimated (excludes fees)</p>
+        </div>
+    </div>
+
+    <div class="alert alert-success" style="margin-top: 1.5rem;">
+        <strong>✅ Next Steps:</strong>
+        {% if result.risk_tier == 'Low' %}
+            This applicant qualifies for auto-approval with standard terms. Proceed to disbursement.
+        {% elif result.risk_tier == 'Medium' %}
+            This applicant qualifies for approval with reduced limits. Consider additional verification.
+        {% elif result.risk_tier == 'High' %}
+            This applicant requires manual review before approval. Schedule credit committee assessment.
+        {% else %}
+            This applicant does not meet current approval criteria. Consider offering alternative products.
+        {% endif %}
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="/score" class="btn btn-primary">Score Another Applicant</a>
+    <a href="/" class="btn btn-secondary">Back to Home</a>
+</div>
+{% endblock %}
