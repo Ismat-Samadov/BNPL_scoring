@@ -2,7 +2,7 @@
 # Multi-stage build for optimized production image
 
 # Stage 1: Builder
-FROM python:3.10-slim as builder
+FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
