@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict
 from datetime import datetime
 import time
+import os
 
 from scoring_engine import (compute_linear_risk_score, sigmoid_pd_mapping,
                             get_risk_tier, get_decision, explain_score)
@@ -41,7 +42,11 @@ app = FastAPI(
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/charts", StaticFiles(directory="charts"), name="charts")
+
+# Mount charts directory only if it exists (optional for production)
+if os.path.exists("charts"):
+    app.mount("/charts", StaticFiles(directory="charts"), name="charts")
+
 templates = Jinja2Templates(directory="templates")
 
 # Track startup time for health check

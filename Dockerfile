@@ -22,13 +22,16 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Create non-root user for security
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1000 appuser
 
 # Copy Python dependencies from builder
 COPY --from=builder /root/.local /home/appuser/.local
 
 # Copy application code
 COPY --chown=appuser:appuser . .
+
+# Create charts directory and set permissions
+RUN mkdir -p /app/charts && chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
