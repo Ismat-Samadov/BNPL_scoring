@@ -47,8 +47,18 @@ export default function ScoreForm() {
   const form = useForm<ScoreFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      user_id: '',
+      user_id: 'FARM_001',
+      region: 'North',
+      farm_type: 'smallholder',
       prior_defaults: 0,
+      crop_type: 'maize',
+      farm_size_ha: 3.5,
+      years_experience: 8,
+      avg_order_value: 18500,
+      monthly_income_est: 42000,
+      recent_cash_inflows: 115000,
+      device_trust_score: 76.3,
+      identity_consistency: 83.2,
     },
   });
 
