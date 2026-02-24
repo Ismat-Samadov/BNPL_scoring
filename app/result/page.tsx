@@ -31,7 +31,7 @@ function ResultContent() {
 
   let result: FullRecommendation;
   try {
-    result = JSON.parse(decodeURIComponent(raw));
+    result = JSON.parse(raw);
   } catch {
     return (
       <div className="py-20 text-center text-muted-foreground">Invalid result data.</div>

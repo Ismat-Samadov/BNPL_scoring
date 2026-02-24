@@ -94,9 +94,9 @@ export default function ScoreForm() {
       if (!res.ok) throw new Error('Scoring failed');
       const result = await res.json();
 
-      // Encode result in URL search params (small enough)
-      const encoded = encodeURIComponent(JSON.stringify(result));
-      router.push(`/result?data=${encoded}`);
+      // Pass result via query string; Next.js router encodes it automatically
+      const params = new URLSearchParams({ data: JSON.stringify(result) });
+      router.push(`/result?${params.toString()}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'An error occurred');
       setLoading(false);
