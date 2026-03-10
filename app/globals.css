@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --neon-green:  #00ff88;
+  --neon-blue:   #00aaff;
+  --neon-red:    #ff4466;
+  --neon-gold:   #ffd700;
+  --bg-dark:     #050010;
+  --bg-mid:      #0a0028;
+}
+
+/* Global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide default cursor on canvas — we draw our own crosshair */
+canvas {
+  display: block;
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Scrollbar style for any scrollable areas */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--neon-green);
+  border-radius: 2px;
+}
+
+/* Prevent text selection */
+button {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pixel-perfect font rendering */
+.font-mono {
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* Neon text utility classes */
+.neon-green { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+.neon-blue  { color: var(--neon-blue);  text-shadow: 0 0 10px var(--neon-blue); }
+.neon-red   { color: var(--neon-red);   text-shadow: 0 0 10px var(--neon-red); }
+.neon-gold  { color: var(--neon-gold);  text-shadow: 0 0 10px var(--neon-gold); }
